@@ -1,0 +1,1 @@
+get-adcomputer -Filter "Name -like 'usssusfs*'" | Format-Table Name -Wrap -AutoS

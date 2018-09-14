@@ -1,0 +1,7 @@
+test-netconnection -computername aitsusas0010 -port 6580 -informationlevel detailed >> C:\temp\output.txt
+test-netconnection -computername aitsusas0011 -port 6580 -informationlevel detailed >> C:\temp\output.txt
+test-netconnection -computername aitsusas0013 -port 6580 -informationlevel detailed >> C:\temp\output.txt
+test-netconnection -computername aitsusas0014 -port 6580 -informationlevel detailed >> C:\temp\output.txt
+test-netconnection -computername aitsusas0015 -port 6580 -informationlevel detailed >> C:\temp\output.txt
+test-netconnection -computername aitsusas0016 -port 6580 -informationlevel detailed >> C:\temp\output.txt
+test-netconnection -computername aitsusas0017 -port 6580 -informationlevel detailed >> C:\temp\output.txt

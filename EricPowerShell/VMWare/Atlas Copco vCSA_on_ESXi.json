@@ -1,0 +1,39 @@
+{
+    "__version": "2.3.0",
+    "__comments": "Sample template to deploy a vCenter Server Appliance with an external Platform Services Controller on an ESXi host.",
+    "new.vcsa": {
+        "esxi": {
+            "hostname": "usssusesx001",
+            "username": "root",
+            "password": "iptwd2qA!",
+            "deployment.network": "VM Network 1501",
+            "datastore": "ESX1-Local-R1"
+        },
+        "appliance": {
+            "thin.disk.mode": true,
+            "deployment.option": "management-small",
+            "name": "USSSUSVC010"
+        },
+        "network": {
+            "ip.family": "ipv4",
+            "mode": "static",
+            "ip": "10.0.32.200",
+            "dns.servers": [
+                "10.128.40.115"
+            ],
+            "prefix": "26",
+            "gateway": "10.0.32.193",
+            "system.name": "usssusvc010.nasa.group.atlascopco.com"
+        },
+        "os": {
+            "password": "iptwd2qA!",
+            "ssh.enable": false
+        },
+        "sso": {
+            "password": "iptwd2qA!",
+            "domain-name": "vsphere.local",
+            "platform.services.controller": "ssisuspsc001.nasa.group.atlascopco.com",
+            "sso.port": 443
+        }
+    }
+}

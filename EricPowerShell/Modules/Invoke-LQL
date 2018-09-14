@@ -1,0 +1,160 @@
+function FixEOL {
+    #helper function for Invoke-LQL
+    param(
+        [string]$String
+    )
+    Write-Debug "fixing $String"
+    $String = $String.Replace("`r", "")
+    if(!$String.endswith("`n")) {
+        return ($String + "`n")
+    } else {
+        return $String
+    }
+}
+
+function ParseFixed16Header {
+    #helper function for Invoke-LQL
+    param(
+        [string]$HeaderLine
+    )
+    Write-Debug "Parsing Fixed16Header: $HeaderLine"
+
+    #Prep an output object with the info we're interested in
+    $Out = "" | select StatusCode,StatusDescription,ResponseLength,IsError
+
+    #Parse out the status code
+    $Out.StatusCode = [int]$HeaderLine.split(" ", [StringSplitOptions]::RemoveEmptyEntries)[0]
+    #Parse out the status message
+    $Out.ResponseLength = $HeaderLine.split(" ", [StringSplitOptions]::RemoveEmptyEntries)[1]
+
+    #Since most status codes are errors, assume it is an error so we only have to make a few exceptions.
+    $Out.IsError = $true
+    switch ($Out.StatusCode) {
+        200 {
+            $Out.StatusDescription = "OK. Response contains the queried data"
+            $Out.IsError = $false
+        }
+        400 {
+            $Out.StatusDescription = "The request contains an invalid header"
+        }
+        403 {
+            $Out.StatusDescription = "The user is not authorized"
+        }
+        404 {
+            $Out.StatusDescription = "The target of the GET has not been found"
+        }
+        450 {
+            $Out.StatusDescription = "A non-existing column was being referred to"
+        }
+        451 {
+            $Out.StatusDescription = "The request is incomplete"
+        }
+        452 {
+            $Out.StatusDescription = "The request is completely invalid"
+        }
+        default {
+            #Write-Warning "Unknown status code: $($Out.StatusCode)"
+            $Out.StatusDescription = "Unknown status code: $($Out.StatusCode)"
+            #I'm making an assumption here that he is following the 200's = non-error
+            #  status messages even though he only specifies 200 explicitly.
+            if($Out.StatusCode -ge 200 -and $Out.StatusCode -lt 300 ) {
+                $Out.IsError = $false
+            }
+        }
+    }
+    return $Out
+}
+
+function Invoke-LQL {
+    #pull info from Livestatus (Check_MK)
+    [cmdletbinding()]
+    param(
+    [string]$Query,
+    [String[]]$Parameters = @(),
+    [String[]]$Columns = @(),
+    $Server,
+    $Port = 6557
+    )
+    #Don't do the annoying prompt if -debug is passed
+    If ($PSCmdlet.MyInvocation.BoundParameters["Debug"].IsPresent) {
+        $DebugPreference="Continue"
+    }
+
+    $tcp = $null
+    $Parameters += "KeepAlive: off"
+    try {
+        $tcp = New-Object Net.Sockets.TcpClient($Server, $Port)
+
+        $Request = FixEOL $Query
+        if($Parameters.length -gt 0) {
+            $Parameters | %{
+                $Request += FixEOL $_
+            }
+        }
+        if($Columns.length -gt 0) {
+            $Request += FixEOL ( "Columns: " + [String]::Join(" ", $Columns))
+        }
+        $Request += FixEOL "Separators: 10 30 29 31"
+        $Request += FixEOL "ResponseHeader: fixed16"
+        $Request += FixEOL ""
+        Write-Debug "Sending query:`r`n$Request"
+        $NetworkStream = $tcp.GetStream()
+        $QueryBytes = [Text.Encoding]::ASCII.GetBytes($Request)
+        $NetworkStream.Write($QueryBytes, 0, $QueryBytes.Length);
+
+        $ResponseSB = New-Object Text.StringBuilder
+        $ResponseBuffer = New-Object Byte[](2048)
+        $BytesRead = 0
+        do {
+            $BytesRead = $NetworkStream.Read($ResponseBuffer, 0, $ResponseBuffer.Length)
+            $ResponseSB.Append([Text.Encoding]::ASCII.GetString($ResponseBuffer, 0, $BytesRead)) > $null
+            #Write-Debug "read $BytesRead bytes"
+        } while ($BytesRead -gt 0)
+        $Header = ""
+        #$ResponseSB.ToString()
+        $ResponseReader = New-Object IO.StringReader($ResponseSB.ToString())
+        $Fixed16Header = ParseFixed16Header $ResponseReader.ReadLine()
+        if($Fixed16Header.IsError) {
+            throw (New-Object System.Exception($Fixed16Header.StatusDescription))
+        }
+        if($Columns.length -gt 0) {
+            $Header = $Columns
+        } else {
+            $Header = $ResponseReader.ReadLine().Split([char]0x1e)
+        }
+        #$Header
+        while($ResponseReader.Peek() -ne -1) {
+            $line = $ResponseReader.ReadLine()
+            #Write-Debug $Line
+            #$Line
+            $Object = ConvertFrom-Csv -Delimiter ([char]0x1E) -Header $Header -InputObject $Line
+            #$Object
+            $Object | ?{$_} | Get-Member -MemberType Properties | %{
+                if( $Object."$($_.name)".Contains(([char]29)) ) {
+                    $Object."$($_.name)" = ($Object."$($_.name)").split(([char]29))
+                }
+                if( $Object."$($_.name)" -is [String[]] ) {
+                    for($i = 0; $i -lt $Object."$($_.name)".length; $i++) {
+                        if($Object."$($_.name)"[$i].Contains(([char]31))) {
+                            $Object."$($_.name)"[$i] = $Object."$($_.name)"[$i].Split( ([char]31) )
+                        }
+                    }
+                } else {
+                    if( $Object."$($_.name)".Contains(([char]31)) ) {
+                        $Object."$($_.name)" = ($Object."$($_.name)").split(([char]31))
+                    }
+                }
+            }
+            $Object
+        }
+    } finally {
+        if($tcp) {
+            $tcp.close()
+        }
+    }
+}
+
+
+# Invoke-LQL -Server 10.48.21.24 -Query 'GET hosts'
+
+# https://mathias-kettner.de/checkmk_livestatus.html

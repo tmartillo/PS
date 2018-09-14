@@ -1,0 +1,6 @@
+"ServerName","Processor","Model","Manufacturer","PhysicalCores","CPU_L2CacheSize","CPU_L3CacheSize","Sockets","LogicalCores","OS_Name","OS_Version","TotalPhysical_Memory_GB","TotalVirtual_Memory_MB","TotalVisable_Memory_MB"
+"SERVER","Intel(R) Xeon(R) CPU           X3430  @ 2.40GHz","Intel64 Family 6 Model 30 Stepping 5","GenuineIntel","4","1024","8192","CPU 1   ","4","Microsoft? Windows Server? 2008 Standard ","6.0.6002","2","4.23","1.99"
+"MEX20","Intel(R) Xeon(R) CPU E5-2620 v3 @ 2.40GHz","x86 Family 6 Model 63 Stepping 2","GenuineIntel",,"0",,"CPU socket #0",,"Microsoft(R) Windows(R) Server 2003, Enterprise Edition","5.2.3790","4","6.76","4"
+"MEX20","Intel(R) Xeon(R) CPU E5-2620 v3 @ 2.40GHz","x86 Family 6 Model 63 Stepping 2","GenuineIntel",,"0",,"CPU socket #1",,"Microsoft(R) Windows(R) Server 2003, Enterprise Edition","5.2.3790","4","6.76","4"
+"MEX20","Intel(R) Xeon(R) CPU E5-2620 v3 @ 2.40GHz","x86 Family 6 Model 63 Stepping 2","GenuineIntel",,"0",,"CPU socket #2",,"Microsoft(R) Windows(R) Server 2003, Enterprise Edition","5.2.3790","4","6.76","4"
+"MEX20","Intel(R) Xeon(R) CPU E5-2620 v3 @ 2.40GHz","x86 Family 6 Model 63 Stepping 2","GenuineIntel",,"0",,"CPU socket #3",,"Microsoft(R) Windows(R) Server 2003, Enterprise Edition","5.2.3790","4","6.76","4"

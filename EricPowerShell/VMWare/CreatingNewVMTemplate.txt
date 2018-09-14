@@ -1,0 +1,17 @@
+Create new VM
+
+Latest version of vHW
+2 vCPU
+8GB vRAM
+Enable hotplug for RAM and vCPU
+Use Paravirtual SCSI controller
+1 vmxnet3 network adapter
+enable Check and upgrade vmware tools before each power on under VM options
+
+Intall OS using ISO
+Set PageFile to 4096
+Install all windows security updates
+
+Run dism /online /cleanup-image /StartComponentCleanup /ResetBase
+Clear all windows logs
+Run C:\windows\System32\Sysprep\Sysprep.exe /oobe /shutdown

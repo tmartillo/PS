@@ -1,0 +1,3 @@
+adduser sisextsts_adm
+passwd sisextsts_adm
+gpasswd -a sisextsts_adm root

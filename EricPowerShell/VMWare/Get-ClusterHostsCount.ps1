@@ -1,0 +1,1 @@
+get-datacenter | select @{n="cluster";e={$_.name}}, @{n="hosts";e={($_ | get-vmhost).count}}
