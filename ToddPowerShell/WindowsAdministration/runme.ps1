@@ -1,1 +1,0 @@
-Invoke-Command -ComputerName 'ssisusisps001' -ConfigurationName 'FindNewServerName' -FilePath http://ssisusgitlab001.nasa.group.atlascopco.com/etalamantes1/Powershell/blob/a99635a8cb5904d43ed1798080612dc24753ad0c/ToddPowerShell/WindowsAdministration/FindNewServerName.ps1
